@@ -429,9 +429,12 @@ The main playbook is:
 ansible/playbooks/site.yml
 ```
 
-To run Ansible commands manually, first enter the Ansible directory:
+To run Ansible commands manually, first load and validate the project configuration:
 
 ```bash
+source scripts/lib/config.sh
+load_project_config
+export AWS_DEFAULT_PROFILE="${AWS_PROFILE}"
 cd ansible
 
 source .venv/bin/activate
