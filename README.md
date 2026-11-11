@@ -482,6 +482,31 @@ Test dynamic inventory:
 ansible-inventory --graph
 ```
 
+### Using a local static inventory (alternative)
+
+To configure a specific EC2 instance manually instead of using dynamic discovery:
+
+```bash
+cp inventory/jump-server.ini inventory/jump-server.local.ini
+nano inventory/jump-server.local.ini
+```
+
+Replace the placeholders with your EC2 instance ID, AWS region and private S3 transfer bucket name.
+
+Validate the inventory:
+
+```bash
+ansible-inventory -i inventory/jump-server.local.ini --graph
+```
+
+Run the playbook using this inventory:
+
+```bash
+ansible-playbook -i inventory/jump-server.local.ini playbooks/site.yml
+```
+
+The local inventory is excluded by `.gitignore`. Never commit account-specific inventory details.
+
 Test connectivity:
 
 ```bash
