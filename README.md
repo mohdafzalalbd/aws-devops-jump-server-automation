@@ -90,7 +90,7 @@ The public subnet and Internet Gateway provide outbound internet connectivity. T
 ## 3. Repository Structure
 
 ```text
-devops-labs-github/
+aws-devops-jump-server-automation/
 │
 ├── .env.example
 ├── .gitignore
@@ -186,12 +186,11 @@ Ansible collection:
 ## 5. Clone the Repository
 
 ```bash
-git clone <YOUR_PUBLIC_REPOSITORY_URL>
+git clone https://github.com/mohdafzalalbd/aws-devops-jump-server-automation.git
 
-cd devops-labs-github
+cd aws-devops-jump-server-automation
 ```
 
-Replace the placeholder with the actual repository URL after publication.
 
 ---
 
