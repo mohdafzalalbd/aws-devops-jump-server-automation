@@ -1,0 +1,8 @@
+---
+- name: Install AWS CLI v2 on Jump Server
+  hosts: jump_servers
+  become: true
+  gather_facts: true
+
+  roles:
+    - aws_cli

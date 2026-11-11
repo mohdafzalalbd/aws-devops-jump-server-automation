@@ -1,0 +1,84 @@
+---
+- name: Detect EC2 architecture
+  ansible.builtin.command: uname -m
+  register: eksctl_machine_arch
+  changed_when: false
+
+- name: Map machine architecture to eksctl architecture
+  ansible.builtin.set_fact:
+    eksctl_arch: >-
+      {{ 'amd64' if eksctl_machine_arch.stdout == 'x86_64'
+         else 'arm64' if eksctl_machine_arch.stdout == 'aarch64'
+         else 'unsupported' }}
+
+- name: Validate supported architecture
+  ansible.builtin.assert:
+    that:
+      - eksctl_arch != 'unsupported'
+    success_msg: "Supported eksctl architecture: {{ eksctl_arch }}"
+    fail_msg: "Unsupported EC2 architecture."
+
+- name: Set eksctl release platform
+  ansible.builtin.set_fact:
+    eksctl_platform: "Linux_{{ eksctl_arch }}"
+
+- name: Download eksctl release archive for the detected architecture
+  ansible.builtin.get_url:
+    url: "https://github.com/eksctl-io/eksctl/releases/download/v{{ eksctl_release_version }}/eksctl_{{ eksctl_platform }}.tar.gz"
+    dest: "/tmp/eksctl_{{ eksctl_platform }}.tar.gz"
+    mode: '0644'
+
+- name: Copy verified eksctl checksum manifest to EC2
+  ansible.builtin.copy:
+    src: eksctl_checksums.txt
+    dest: /tmp/eksctl_checksums.txt
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Verify eksctl archive SHA-256 checksum on EC2
+  ansible.builtin.shell:
+    cmd: >-
+      awk '$2 == "eksctl_{{ eksctl_platform }}.tar.gz" { print }'
+      eksctl_checksums.txt |
+      sha256sum --check
+  args:
+    chdir: /tmp
+    executable: /bin/bash
+  changed_when: false
+
+- name: Create eksctl extraction directory
+  ansible.builtin.file:
+    path: "/tmp/eksctl-{{ eksctl_release_version }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Extract eksctl archive
+  ansible.builtin.unarchive:
+    src: "/tmp/eksctl_{{ eksctl_platform }}.tar.gz"
+    dest: "/tmp/eksctl-{{ eksctl_release_version }}"
+    remote_src: true
+    creates: "/tmp/eksctl-{{ eksctl_release_version }}/eksctl"
+
+- name: Install eksctl binary
+  ansible.builtin.copy:
+    src: "/tmp/eksctl-{{ eksctl_release_version }}/eksctl"
+    dest: /usr/local/bin/eksctl
+    remote_src: true
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Verify eksctl installation
+  ansible.builtin.command: eksctl version
+  register: eksctl_version_output
+  changed_when: false
+
+- name: Confirm expected eksctl version
+  ansible.builtin.assert:
+    that:
+      - eksctl_version_output.stdout | trim == eksctl_release_version
+    success_msg: "eksctl {{ eksctl_release_version }} is installed successfully."
+    fail_msg: "Installed eksctl version does not match the configured version."

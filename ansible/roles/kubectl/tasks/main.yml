@@ -1,0 +1,43 @@
+---
+- name: Detect EC2 architecture for kubectl
+  ansible.builtin.set_fact:
+    kubectl_arch: >-
+      {{ 'amd64' if ansible_facts['architecture'] == 'x86_64'
+         else 'arm64' if ansible_facts['architecture'] in ['aarch64', 'arm64']
+         else 'unsupported' }}
+
+- name: Validate supported kubectl architecture
+  ansible.builtin.assert:
+    that:
+      - kubectl_arch != 'unsupported'
+    success_msg: "Supported kubectl architecture: {{ kubectl_arch }}"
+    fail_msg: "Unsupported EC2 architecture for kubectl."
+
+- name: Download current stable Kubernetes version
+  ansible.builtin.get_url:
+    url: https://dl.k8s.io/release/stable.txt
+    dest: /tmp/kubectl-stable.txt
+    mode: '0644'
+
+- name: Read current stable Kubernetes version
+  ansible.builtin.command: cat /tmp/kubectl-stable.txt
+  register: kubectl_stable_version
+  changed_when: false
+
+- name: Download kubectl binary with checksum validation
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/{{ kubectl_stable_version.stdout }}/bin/linux/{{ kubectl_arch }}/kubectl"
+    dest: /usr/local/bin/kubectl
+    owner: root
+    group: root
+    mode: '0755'
+    checksum: "sha256:https://dl.k8s.io/release/{{ kubectl_stable_version.stdout }}/bin/linux/{{ kubectl_arch }}/kubectl.sha256"
+
+- name: Verify kubectl client version
+  ansible.builtin.command: kubectl version --client
+  register: kubectl_version
+  changed_when: false
+
+- name: Display kubectl version
+  ansible.builtin.debug:
+    var: kubectl_version.stdout_lines

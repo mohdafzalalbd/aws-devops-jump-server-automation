@@ -1,0 +1,8 @@
+---
+- name: Install Helm on AWS Jump Server
+  hosts: jump_servers
+  become: true
+  gather_facts: true
+
+  roles:
+    - helm

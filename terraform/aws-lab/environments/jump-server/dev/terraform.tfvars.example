@@ -1,0 +1,26 @@
+# AWS account configuration
+aws_region  = "ap-south-1"
+aws_profile = "default"
+
+# Project identification
+project_name = "my-devops-lab"
+environment  = "learning"
+
+# EC2 Jump Server configuration
+# Supported architectures: amd64 or arm64.
+# amd64 requires an x86-compatible instance type (example: t3.small).
+# arm64 requires an ARM-compatible instance type (example: t4g.small).
+ami_architecture = "amd64"
+instance_type    = "t3.small"
+root_volume_size = 30
+
+# Network configuration
+vpc_cidr           = "10.0.0.0/16"
+public_subnet_cidr = "10.0.1.0/24"
+
+# Leave null to automatically select an available zone in your AWS region.
+# Alternatively, specify an Availability Zone manually.
+availability_zone = null
+
+# Resource ownership
+owner_name = "my-platform-team"

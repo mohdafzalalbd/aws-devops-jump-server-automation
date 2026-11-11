@@ -1,0 +1,31 @@
+---
+- name: Verify AWS Jump Server configuration
+  hosts: jump_servers
+  gather_facts: true
+  become: true
+
+  tasks:
+    - name: Display operating system
+      ansible.builtin.debug:
+        msg: "Operating System: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: Verify Python version
+      ansible.builtin.command: python3 --version
+      register: python_result
+      changed_when: false
+
+    - name: Display Python version
+      ansible.builtin.debug:
+        var: python_result.stdout
+
+    - name: Verify root privilege escalation
+      ansible.builtin.command: id -u
+      register: root_check
+      changed_when: false
+
+    - name: Confirm root privileges
+      ansible.builtin.assert:
+        that:
+          - root_check.stdout == "0"
+        success_msg: "Privilege escalation successful. Ansible is running this task as root."
+        fail_msg: "Privilege escalation failed. Check sudo permissions."

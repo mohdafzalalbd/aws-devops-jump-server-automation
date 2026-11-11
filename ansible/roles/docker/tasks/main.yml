@@ -1,0 +1,60 @@
+---
+- name: Create APT keyrings directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Download Docker official GPG key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+
+- name: Detect system package architecture
+  ansible.builtin.command: dpkg --print-architecture
+  register: docker_arch
+  changed_when: false
+
+- name: Configure official Docker APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ docker_arch.stdout }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    filename: docker
+    state: present
+    update_cache: true
+
+- name: Install Docker Engine and plugins
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Ensure Docker service is enabled and running
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
+
+- name: Verify Docker version
+  ansible.builtin.command: docker --version
+  register: docker_version
+  changed_when: false
+
+- name: Display Docker version
+  ansible.builtin.debug:
+    var: docker_version.stdout
+
+- name: Verify Docker Compose version
+  ansible.builtin.command: docker compose version
+  register: compose_version
+  changed_when: false
+
+- name: Display Docker Compose version
+  ansible.builtin.debug:
+    var: compose_version.stdout

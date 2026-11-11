@@ -1,0 +1,14 @@
+---
+- name: Configure complete DevOps Jump Server
+  hosts: jump_servers
+  become: true
+  gather_facts: true
+
+  roles:
+    - common
+    - aws_cli
+    - terraform
+    - docker
+    - kubectl
+    - helm
+    - eksctl

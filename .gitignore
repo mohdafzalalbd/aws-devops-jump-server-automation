@@ -1,0 +1,87 @@
+# ==================================================
+# TERRAFORM
+# ==================================================
+
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfplan
+**/crash.log
+**/crash.*.log
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json
+
+# Local Terraform configuration and variables
+**/*.tfvars
+**/*.tfvars.json
+**/*.auto.tfvars
+**/*.auto.tfvars.json
+
+# Keep reusable example configurations
+!**/*.tfvars.example
+!**/*.tfvars.json.example
+
+# Keep Terraform provider lock files
+!**/.terraform.lock.hcl
+
+# ==================================================
+# PYTHON
+# ==================================================
+
+**/.venv/
+**/venv/
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.mypy_cache/
+
+# ==================================================
+# ANSIBLE
+# ==================================================
+
+**/*.retry
+**/.ansible/
+**/vault-password*
+**/.vault_pass
+
+# ==================================================
+# AWS AND CLOUD CREDENTIALS
+# ==================================================
+
+.aws/
+**/.aws/
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+*.pem
+*.key
+*.p12
+*.pfx
+
+**/credentials
+**/kubeconfig
+**/.kube/
+
+# ==================================================
+# LOGS AND GENERATED FILES
+# ==================================================
+
+*.log
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ==================================================
+# EDITOR AND IDE
+# ==================================================
+
+.vscode/
+.idea/

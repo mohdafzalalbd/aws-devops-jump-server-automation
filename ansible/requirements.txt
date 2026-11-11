@@ -1,0 +1,5 @@
+# Ansible automation engine
+ansible-core==2.18.20
+
+# AWS SDK required for EC2 dynamic inventory and SSM integration
+boto3==1.43.126

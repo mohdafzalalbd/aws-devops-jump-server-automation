@@ -1,0 +1,48 @@
+---
+- name: Create APT keyrings directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Download Helm repository signing key
+  ansible.builtin.get_url:
+    url: https://packages.buildkite.com/helm-linux/helm-debian/gpgkey
+    dest: /etc/apt/keyrings/helm.asc
+    mode: '0644'
+
+- name: Inspect Helm repository signing key
+  ansible.builtin.command:
+    cmd: gpg --show-keys --with-colons /etc/apt/keyrings/helm.asc
+  register: helm_key_info
+  changed_when: false
+
+- name: Verify Helm repository signing key fingerprint
+  ansible.builtin.assert:
+    that:
+      - "'DDF78C3E6EBB2D2CC223C95C62BA89D07698DBC6' in helm_key_info.stdout"
+    success_msg: "Helm repository signing key fingerprint verified."
+    fail_msg: "Unexpected Helm signing key fingerprint. Repository configuration stopped."
+
+- name: Configure official Helm-listed APT repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/helm.asc] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main"
+    filename: helm-stable-debian
+    state: present
+    update_cache: true
+
+- name: Install Helm
+  ansible.builtin.apt:
+    name: helm
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Verify Helm version
+  ansible.builtin.command: helm version --short
+  register: helm_version
+  changed_when: false
+
+- name: Display Helm version
+  ansible.builtin.debug:
+    var: helm_version.stdout
